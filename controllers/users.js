@@ -5,19 +5,12 @@ var mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
-// var con = mysql.createConnection({
-//     host: "localhost",
-//     user: "root",
-//     password: "000000",
-//     database:"logistics"
-//     });
 var con = mysql.createConnection({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
-    database:"logistics"
+    database:process.env.DB_DATABASE
     });
-
 
 //REGISTER USER
 const register = (req,res) => {
@@ -54,9 +47,9 @@ const register = (req,res) => {
             //CHECK FOR EXISTING PHONE NUMBER
             con.query(`SELECT * FROM users WHERE email = '${newUser.email}' OR phone = '${newUser.phone}'`, (err,rows) => {
                 if(err) throw err;          
-                // console.log(rows);
+                console.log(rows);
                 if(rows.length == 0){
-                    // console.log("Save User")
+                    console.log("Save User")
                     con.query(
                         `
                             INSERT INTO users (name, email, phone, password, address, referral_code, points )
@@ -64,13 +57,13 @@ const register = (req,res) => {
                          `
                     ,(err,data) => {
                         if(err) throw err
-                        // console.log(data)
+                        console.log(data)
                         res.status(201).json({success:true,message:"user has been created"})
                     })
                     
                 }
                 else{
-                    // console.log("User exists")
+                    console.log("User exists")
                     res.status(400).json({success:false,message:"user already exists"})
                 }
             })
@@ -107,3 +100,36 @@ module.exports = {
     register,
     authenticate
 }
+
+
+// CREATE TABLE `sql2392263`.`users` (
+//     `id` INT NOT NULL AUTO_INCREMENT,
+//     `name` VARCHAR(45) NOT NULL,
+//     `email` VARCHAR(45) NOT NULL,
+//     `phone` VARCHAR(45) NOT NULL,
+//     `password` VARCHAR(45) NOT NULL,
+//     `address` VARCHAR(45) NOT NULL,
+//     `referral_code` VARCHAR(45) NULL,
+//     `points` INT NULL,
+//     PRIMARY KEY (`id`));
+
+// var con = mysql.createConnection({
+//     host: "localhost",
+//     user: "root",
+//     password: "000000",
+//     database:"logistics"
+//     });
+
+// var con = mysql.createConnection({
+//     host: process.env.DB_HOST,
+//     user: process.env.DB_USER,
+//     password: process.env.DB_PASS,
+//     database:"logistics"
+//     });
+
+// var con = mysql.createConnection({
+//     host: 'sql2.freemysqlhosting.net',
+//     user: 'sql2392263',
+//     password: 'xK2%fJ2%',
+//     database:"sql2392263"
+//     });
