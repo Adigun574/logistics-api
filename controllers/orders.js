@@ -13,7 +13,7 @@ var con = mysql.createConnection({
     password: process.env.DB_PASS,
     database:process.env.DB_DATABASE
     });
-    
+
 const createOrder = (req, res) => {
     const newOrder = {
         from_location:req.body.from_location,
@@ -23,19 +23,30 @@ const createOrder = (req, res) => {
         transport_mode:req.body.transport_mode,
         length:req.body.length,
         width:req.body.width,
-        height:req.body.height,
+        height:req.body.height || '0',
         weight:req.body.weight,
-        measurement_unit:req.body.measurement_unit,
+        measurement_unit:req.body.measurement_unit || 'default',
         delivery_status:'Order Received',
-        user_id:req.body.user_id
+        user_id:req.body.user_id,
+        //
+        price:req.body.price,
+        sname:req.body.sname,
+        sphone:req.body.sphone,
+        rname:req.body.rname,
+        rphone:req.body.rphone
     }
+
+    console.log(newOrder)
+    // return 
 
     if(!newOrder.from_location || !newOrder.from_date ||  
         !newOrder.to_location || !newOrder.to_date ||
         !newOrder.transport_mode || !newOrder.length ||
         !newOrder.width || !newOrder.height ||
         !newOrder.weight || !newOrder.measurement_unit ||
-        !newOrder.user_id
+        !newOrder.user_id || !newOrder.sname ||
+        !newOrder.sphone || !newOrder.rname || 
+        !newOrder.rphone
         ){
             res.status(400).json({success:false,message:'incomplete fields'})
         }
@@ -43,12 +54,14 @@ const createOrder = (req, res) => {
         con.query(
             `
                 INSERT INTO orders (from_location, from_date, to_location, to_date, transport_mode,
-                    length, width, height, weight, measurement_unit, delivery_status, user_id
+                    length, width, height, weight, measurement_unit, delivery_status, user_id,
+                    sname, sphone, rname, rphone
                     )
                 VALUES ("${newOrder.from_location}", "${newOrder.from_date}", "${newOrder.to_location}",
                     "${newOrder.to_date}", "${newOrder.transport_mode}", "${newOrder.length}",
                     "${newOrder.width}", "${newOrder.height}", "${newOrder.weight}",
-                    "${newOrder.measurement_unit}", "${newOrder.delivery_status}", "${newOrder.user_id}"
+                    "${newOrder.measurement_unit}", "${newOrder.delivery_status}", "${newOrder.user_id}",
+                    "${newOrder.sname}", "${newOrder.sphone}", "${newOrder.rname}", "${newOrder.rphone}"
                 )
             `
         ,(err, result) => {
@@ -60,15 +73,15 @@ const createOrder = (req, res) => {
             else{
                 // console.log(result.insertId)
                 let createdOrderID = result.insertId
-                //SET PRICE
-                const price = 1000 + Math.random()*1000 + Math.random()*500
-                console.log(price)
+                // //SET PRICE
+                // const price = 1000 + Math.random()*1000 + Math.random()*500
+                // console.log(price)
 
                 res.status(201).json({success:true, message:'order created'})
                 con.query(
                     `
                         INSERT INTO payments (total_amount, amount_paid, balance, payment_status, order_id)
-                        VALUES (${price}, ${0}, ${price}, ${false}, ${createdOrderID})
+                        VALUES (${newOrder.price}, ${0}, ${newOrder.price}, ${false}, ${createdOrderID})
                     `,
                     (err, result1) => {
                         // console.log(err)
@@ -102,7 +115,8 @@ const getOrdersByUserID = (req, res) => {
 }
 
 const getQuickQuote = (req, res) => {
-    const price = 1000 + Math.random()*1000 + Math.random()*500
+    // const price = 1000 + Math.random()*1000 + Math.random()*500
+    const price = Math.floor(Math.random() * 10000)
     res.status(200).json({success:true,message:Math.floor(price)})
 }
 

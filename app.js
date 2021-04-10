@@ -1,10 +1,13 @@
 const express = require('express')
 const app = express()
+var cors = require('cors')
 const UsersRoutes = require('./routes/users')
 const OrdersRoute = require('./routes/orders')
 const PaymentRoute = require('./routes/payments')
 
 const port = process.env.PORT || 3000
+
+app.use(cors())
 
 var bodyParser = require('body-parser')
 

@@ -14,4 +14,8 @@ router.post('/authenticate', (req,res)=>{
     Users.authenticate(req,res)
 })
 
+router.post('/resetpassword', (req,res) => {
+    Users.resetpassword(req,res)
+})
+
 module.exports = router

@@ -14,13 +14,14 @@ var con = mysql.createConnection({
 
 //REGISTER USER
 const register = (req,res) => {
+    let generatedRefCode = `${req.body.name.slice(0,3).toUpperCase()}${Math.ceil(Math.random()*1000)}`
     let newUser = {
         name:req.body.name,
         password:req.body.password,
         email:req.body.email,
         phone:req.body.phone,
         address:req.body.address,
-        referral_code:req.body.referral_code,
+        referral_code:generatedRefCode,
         points:10
     }
       
@@ -41,15 +42,18 @@ const register = (req,res) => {
         newUser.password = hash
         // console.log(newUser)
         con.connect(function(err) {
-            if (err) throw err;
+            // if (err) throw err;
+            if (err) {
+                console.log(err)
+            };
             // console.log("Connected!");
             //CHECK FOR EXISTING EMAIL
             //CHECK FOR EXISTING PHONE NUMBER
             con.query(`SELECT * FROM users WHERE email = '${newUser.email}' OR phone = '${newUser.phone}'`, (err,rows) => {
                 if(err) throw err;          
-                console.log(rows);
+                // console.log(rows);
                 if(rows.length == 0){
-                    console.log("Save User")
+                    // console.log("Save User")
                     con.query(
                         `
                             INSERT INTO users (name, email, phone, password, address, referral_code, points )
@@ -58,12 +62,22 @@ const register = (req,res) => {
                     ,(err,data) => {
                         if(err) throw err
                         console.log(data)
-                        res.status(201).json({success:true,message:"user has been created"})
-                    })
-                    
+                        con.query(`SELECT * FROM users WHERE id = ${data.insertId}`, (err2, rows2) => {
+                            // if(err2) throw err2
+                            // console.log(rows2)
+                            // res.status(201).json({success:true,message:rows2[0]})
+                            if(err2){
+                                res.status(201).json({success:true,message:"user has been created"})
+                            }
+                            else{
+                                res.status(201).json({success:true,message:rows2[0]})
+                            }
+                        })
+                        // res.status(201).json({success:true,message:"user has been created"})
+                    })                    
                 }
                 else{
-                    console.log("User exists")
+                    // console.log("User exists")
                     res.status(400).json({success:false,message:"user already exists"})
                 }
             })
@@ -96,9 +110,45 @@ const authenticate = (req, res) => {
     })
 }
 
+const resetpassword = (req, res) => {
+    con.query(`SELECT * FROM users where id = '${req.body.user_id}'`, (err,data)=>{
+        if(err) throw err
+        if(data.length == 0){
+            res.status(400).json({success:false,message:"old password is incorrect"})
+        }
+        else{
+            bcrypt.compare(req.body.old_password, data[0].password, function(err, result) {
+                if(result){
+                    console.log(result)
+                    bcrypt.hash(req.body.new_password, saltRounds, function(err, hash) {
+                        let hashedNewPassword = hash
+                        con.query(
+                            `
+                                UPDATE users SET password = '${hashedNewPassword}' 
+                                    WHERE id = ${req.body.user_id}
+                            `,
+                            (err, result) => {
+                                if(err){
+                                    res.status(500).json({success:false, message:'something went wrong'})
+                                    return
+                                }
+                                res.status(200).json({success:true, message:'password has been updated'})
+                            }
+                        )
+                    })
+                }
+                else{
+                    res.status(400).json({success:false,message:"old password is incorrect"})
+                }
+            });
+        }
+    })
+}
+
 module.exports = {
     register,
-    authenticate
+    authenticate,
+    resetpassword
 }
 
 
