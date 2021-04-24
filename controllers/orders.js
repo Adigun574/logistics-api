@@ -104,7 +104,27 @@ const getAllOrders = (req, res) => {
 }
 
 const getOrdersByUserID = (req, res) => {
-    con.query(`SELECT * FROM orders where user_id = '${req.params.id}'`, (err, result) => {
+    // con.query(`SELECT * FROM orders where user_id = '${req.params.id}'`, (err, result) => {
+    //     if(err){
+    //         res.status(500).json({success:false, message:[]})
+    //     }
+    //     else{
+    //         res.status(200).json({success:true,message:result})
+    //     }
+    // })
+    // `SELECT *
+    // FROM orders
+    // INNER JOIN payments ON orders.id=payments.order_id where user_id = '${req.params.id}';`
+    
+    // con.query(`SELECT payments.total_amount, payments.payment_status, orders.delivery_status, orders.from_date, orders.id, payments.order_id, 
+    //     FROM orders
+    //     INNER JOIN payments ON orders.id=payments.order_id where user_id = '${req.params.id}';`, (err, result) => {
+    
+    con.query(`SELECT payments.total_amount, orders.user_id, payments.payment_status, orders.delivery_status, orders.from_date, orders.id, payments.order_id
+    FROM orders
+    INNER JOIN payments ON orders.id=payments.order_id where user_id = '${req.params.id}';`, (err, result) => {
+
+        console.log(err)
         if(err){
             res.status(500).json({success:false, message:[]})
         }

@@ -22,3 +22,18 @@ app.use('/orders', OrdersRoute)
 app.use('/payments', PaymentRoute)
 
 app.listen(port, ()=>console.log("server running on port 3000"))
+
+// ///FLUTTERWAVE PAYMENT VERIFICATION METHOD
+// var request = require('request');
+// var options = {
+//   'method': 'GET',
+//   'url': 'https://api.flutterwave.com/v3/transactions/2043679/verify',
+//   'headers': {
+//     'Content-Type': 'application/json',
+//     'Authorization': 'Bearer FLWSECK_TEST-c9b9b3a648bbce712c86c49fa77fdb2e-X'
+//   }
+// };
+// request(options, function (error, response) { 
+//   if (error) throw new Error(error);
+//   console.log(response.body); 
+// });

@@ -63,15 +63,23 @@ const register = (req,res) => {
                         if(err) throw err
                         console.log(data)
                         con.query(`SELECT * FROM users WHERE id = ${data.insertId}`, (err2, rows2) => {
-                            // if(err2) throw err2
-                            // console.log(rows2)
-                            // res.status(201).json({success:true,message:rows2[0]})
                             if(err2){
                                 res.status(201).json({success:true,message:"user has been created"})
                             }
                             else{
                                 res.status(201).json({success:true,message:rows2[0]})
                             }
+
+                            //SETTING UP WALLET STARTS
+                            con.query(
+                                `
+                                    INSERT INTO balance (userid, balance)
+                                    VALUES ("${data.insertId}", "${0}");
+                                 `),(err2,data2)=>{
+                                    if(err2) console.log(err2)
+                                    else console.log(data2)
+                                 }
+                            //SETTING UP WALLET ENDS
                         })
                         // res.status(201).json({success:true,message:"user has been created"})
                     })                    
